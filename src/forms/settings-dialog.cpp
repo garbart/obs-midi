@@ -115,7 +115,6 @@ void PluginWindow::SetAvailableDevices()
 		ui->tab_configure->setEnabled(true);
 		ui->bidirectional->setEnabled(true);
 		ui->check_enabled->setEnabled(true);
-		this->ui->outbox->setEnabled(true);
 		ui->tabWidget->setEnabled(true);
 		loadingdevices = true;
 		this->ui->outbox->clear();
@@ -143,6 +142,13 @@ void PluginWindow::SetAvailableDevices()
 	this->ui->list_midi_dev->setCurrentRow(-1);
 	this->ui->list_midi_dev->setCurrentRow(0);
 	on_device_select(ui->list_midi_dev->currentItem()->text());
+	
+	ui->outbox->setEnabled(
+		GetDeviceManager()
+			.get()
+			->GetMidiDeviceByName(
+				ui->list_midi_dev->currentItem()->text())
+			->isBidirectional());
 }
 void PluginWindow::select_output_device(QString selectedDeviceName)
 {
@@ -177,10 +183,9 @@ int PluginWindow::on_check_enabled_state_changed(int state)
 		device->open_midi_input_port(devicePort);
 		device->open_midi_output_port(deviceOutPort);
 		device->set_enabled(true);
-		device->setBidirectional(true);
 		ui->bidirectional->setEnabled(true);
-		ui->bidirectional->setChecked(true);
-		ui->outbox->setEnabled(true);
+		ui->bidirectional->setChecked(device->isBidirectional());
+		ui->outbox->setEnabled(device->isBidirectional());
 	}
 	//ui->outbox->setCurrentText(QString::fromStdString(device->GetOutName()));
 	GetConfig()->Save();
@@ -247,6 +252,7 @@ int PluginWindow::on_bid_enabled_state_changed(int state)
 {
 	auto device = GetDeviceManager()->GetMidiDeviceByName(
 		ui->list_midi_dev->currentItem()->text().toStdString().c_str());
+	ui->outbox->setEnabled(state);
 	if (state) {
 		device->setBidirectional(state);
 		return 1;

@@ -173,7 +173,7 @@ void MidiAgent::set_midi_output_name(QString oname)
 }
 bool MidiAgent::setBidirectional(bool state)
 {
-	bidirectional = state;
+	this->bidirectional = state;
 	if (!state) {
 		midiout.close_port();
 
@@ -185,6 +185,7 @@ bool MidiAgent::setBidirectional(bool state)
 			GetDeviceManager()->GetOutPortNumberByDeviceName(
 				midi_output_name));
 	}
+	GetConfig().get()->Save();
 	return state;
 }
 
